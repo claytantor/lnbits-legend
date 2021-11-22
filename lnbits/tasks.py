@@ -94,6 +94,7 @@ async def check_pending_payments():
             incoming=incoming,
             exclude_uncheckable=True,
         ):
+            print(f"check_pending_payments - checking payment {payment.checking_id}")
             await payment.check_pending()
 
         # after the first check we will only check outgoing, not incoming

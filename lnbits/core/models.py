@@ -150,6 +150,7 @@ class Payment(NamedTuple):
             print(f" - deleting outgoing failed payment {self.checking_id}: {status}")
             await self.delete()
         elif not status.pending:
+            print("check_pending models")
             print(
                 f" - marking '{'in' if self.is_in else 'out'}' {self.checking_id} as not pending anymore: {status}"
             )

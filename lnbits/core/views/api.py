@@ -340,14 +340,16 @@ async def api_payments_sse():
 
     send_payment, receive_payment = trio.open_memory_channel(0)
 
-    print("adding sse listener", send_payment)
+    print("adding sse listener", send_payment.__dict__, receive_payment.__dict__, this_wallet_id)
     api_invoice_listeners.append(send_payment)
 
     send_event, event_to_send = trio.open_memory_channel(0)
 
     async def payment_received() -> None:
         async for payment in receive_payment:
+            print("payment sse event", payment, payment.wallet_id, this_wallet_id)
             if payment.wallet_id == this_wallet_id:
+                print("payment-received", payment.__dict__)
                 await send_event.send(("payment-received", payment))
 
     async def repeat_keepalive():
@@ -360,6 +362,7 @@ async def api_payments_sse():
     current_app.nursery.start_soon(repeat_keepalive)
 
     async def send_events():
+        print("send_events")
         try:
             async for typ, data in event_to_send:
                 message = [f"event: {typ}".encode("utf-8")]
@@ -393,6 +396,7 @@ async def api_payments_sse():
     }
 )
 async def api_payments_decode():
+    print("decode", g.data["data"])
     try:
         if g.data["data"][:5] == "LNURL":
             url = lnurl.decode(g.data["data"])
@@ -426,6 +430,7 @@ async def api_payments_decode():
 @core_app.route("/api/v1/lnurlscan/<code>", methods=["GET"])
 @api_check_wallet_key("invoice")
 async def api_lnurlscan(code: str):
+    print("lnurlscan", code)
     try:
         url = lnurl.decode(code)
         domain = urlparse(url).netloc
@@ -548,6 +553,7 @@ async def api_lnurlscan(code: str):
     }
 )
 async def api_perform_lnurlauth():
+    print("lnurlauth", g.data["callback"])
     err = await perform_lnurlauth(g.data["callback"])
     if err:
         return jsonify({"reason": err.reason}), HTTPStatus.SERVICE_UNAVAILABLE
