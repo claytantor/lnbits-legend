@@ -223,7 +223,7 @@
     <q-card>
       <q-card-section>
         <h6 class="text-subtitle1 q-mt-none q-mb-sm">
-          {{ SITE_TITLE }} wallet: <strong><em>{{ wallet.name }}</em></strong>
+          YAGGA {{ SITE_TITLE }} wallet: <strong><em>{{ wallet.name }}</em></strong>
         </h6>
       </q-card-section>
       <q-card-section class="q-pa-none">
@@ -241,6 +241,7 @@
                   This is an LNURL-withdraw QR code for slurping everything from
                   this wallet. Do not share with anyone.
                 </p>
+                <p>lightning:{{wallet.lnurlwithdraw_full}}</p>
                 <a href="lightning:{{wallet.lnurlwithdraw_full}}">
                   <qrcode
                     value="{{wallet.lnurlwithdraw_full}}"
@@ -255,6 +256,9 @@
               </q-card-section>
             </q-card>
           </q-expansion-item>
+          <q-separator></q-separator>
+          {% else %}
+          <p>no full address</p>
           <q-separator></q-separator>
           {% endif %}
 

@@ -13,6 +13,8 @@ from lnbits.bolt11 import Invoice
 from lnbits.decorators import api_check_wallet_key, api_validate_post_request
 from lnbits.utils.exchange_rates import currencies, fiat_amount_as_satoshis
 
+from lnurl import encode as lnurl_encode  # type: ignore
+
 from .. import core_app, db
 from ..crud import get_payments, save_balance_check, update_wallet
 from ..services import (
@@ -563,3 +565,20 @@ async def api_perform_lnurlauth():
 @core_app.route("/api/v1/currencies", methods=["GET"])
 async def api_list_currencies_available():
     return jsonify(list(currencies.keys()))
+
+@core_app.route("/api/v1/drain/lnurl", methods=["GET"])
+@api_check_wallet_key("invoice")
+async def api_get_drain_url():
+    url = url_for(
+            "core.lnurl_full_withdraw",
+            usr=g.wallet.user,
+            wal=g.wallet.id,
+            _external=True,
+        )
+    try:
+        encoded_url = lnurl_encode(url)
+        return jsonify({'encoded_url':encoded_url})
+
+    except Exception as e:
+        print("error making drain url",e)
+        return "", 400
