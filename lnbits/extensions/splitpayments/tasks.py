@@ -22,7 +22,7 @@ async def register_listeners():
 async def wait_for_paid_invoices(invoice_paid_chan: trio.MemoryReceiveChannel):
     print(f"wait_for_paid_invoices: {invoice_paid_chan.__dict__}")
     async for payment in invoice_paid_chan:
-        print(f"payment item for wait subscribe: {payment.__dict__}")
+        #print(f"payment item for wait subscribe: {payment.__dict__}")
         await on_invoice_paid(payment)
 
 
