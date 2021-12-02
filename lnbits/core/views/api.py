@@ -351,7 +351,7 @@ async def api_payments_sse():
         async for payment in receive_payment:
             print("payment sse event", payment, payment.wallet_id, this_wallet_id)
             if payment.wallet_id == this_wallet_id:
-                print("payment-received", payment.__dict__)
+                #print("payment-received", payment.__dict__)
                 await send_event.send(("payment-received", payment))
 
     async def repeat_keepalive():
