@@ -46,12 +46,16 @@ async def lnurl_response(nonce, pos_id, payload):
     )
     if not lnurlpospayment:
         return jsonify({"status": "ERROR", "reason": "Could not create payment"})
+
+    # this allows us to use api gateway as a proxy
+    cb_url = url_for(
+             "rapaygo.lnurl_callback",
+             paymentid=lnurlpospayment.id,
+             _external=True,
+        ).replace("lnbits.rapaygo.com","api.rapaygo.com/ln")
+
     resp = LnurlPayResponse(
-        callback=url_for(
-            "rapaygo.lnurl_callback",
-            paymentid=lnurlpospayment.id,
-            _external=True,
-        ),
+        callback=cb_url,
         min_sendable=price_msat,
         max_sendable=price_msat,
         metadata=LnurlPayMetadata(json.dumps([["text/plain", str(pos.title)]])),
