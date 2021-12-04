@@ -12,6 +12,9 @@ from quart import (
     url_for,
 )
 
+import json
+
+from quart.wrappers import response
 from lnbits.core import core_app, db
 from lnbits.decorators import check_user_exists, validate_uuids
 from lnbits.settings import LNBITS_ALLOWED_USERS, SERVICE_FEE, LNBITS_SITE_TITLE
@@ -68,7 +71,14 @@ async def extensions():
 
 @core_app.route("/create_wallet", methods=['POST'])
 # @validate_uuids(["usr", "wal"])
-async def create_wallet():
+async def create_user_wallet():
+    post_body = await request.get_data()
+    post_data = json.loads(post_body)
+
+    user = await get_user((await create_account()).id)
+    wallet = await create_wallet(user_id=user.id, wallet_name=post_data['nme'])
+
+    # print(json.loads(post_body))
     # user_id = request.args.get("usr", type=str)
     # wallet_id = request.args.get("wal", type=str)
     # wallet_name = request.args.get("nme", type=str)
@@ -106,7 +116,15 @@ async def create_wallet():
     # return await render_template(
     #     "core/wallet.html", user=user, wallet=wallet, service_fee=service_fee
     # )
-    return jsonify({"response":"created"})
+    response_model = {
+        "nme":post_data["nme"],
+        "usr":user.id,
+        "wal":wallet.id,
+        "wal_admin":wallet.adminkey,
+        "wal_inkey":wallet.inkey
+    }
+
+    return jsonify(response_model)
 
 
 
