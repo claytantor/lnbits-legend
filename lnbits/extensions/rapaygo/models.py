@@ -34,11 +34,12 @@ class lnurlposs(NamedTuple):
             paymentid=paymentid,
             _external=True,
         )
-        print(url)
+        pin_response_url = url.replace("lnbits.rapaygo.com","api.rapaygo.com/ln")
+        print(pin_response_url)
         return {
             "tag": "url",
-            "description": "Check the attached link",
-            "url": url,
+            "description": "You MUST click the link to see your rapaygo PIN",
+            "url": pin_response_url,
         }
 
 

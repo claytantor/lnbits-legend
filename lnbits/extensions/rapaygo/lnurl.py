@@ -46,16 +46,40 @@ async def lnurl_response(nonce, pos_id, payload):
     )
     if not lnurlpospayment:
         return jsonify({"status": "ERROR", "reason": "Could not create payment"})
-    resp = LnurlPayResponse(
-        callback=url_for(
+     
+    cb_url = url_for(
             "rapaygo.lnurl_callback",
             paymentid=lnurlpospayment.id,
             _external=True,
-        ),
+        )
+    #print(cb_url)
+    # https://lnbits.rapaygo.com/rapaygo/api/v1/lnurl/cb/Lpw9BDYxZqtZHY2ge64tXF
+
+    cb_url = cb_url.replace("lnbits.rapaygo.com","api.rapaygo.com/ln")
+
+    print(cb_url)
+
+#    resp = LnurlPayResponse(
+#        callback=url_for(
+#            "rapaygo.lnurl_callback",
+#            paymentid=lnurlpospayment.id,
+#            _external=True,
+#        ),
+#        min_sendable=price_msat,
+#        max_sendable=price_msat,
+#        metadata=LnurlPayMetadata(json.dumps([["text/plain", str(pos.title)]])),
+#    )
+
+    resp = LnurlPayResponse(
+        callback=cb_url,
         min_sendable=price_msat,
         max_sendable=price_msat,
         metadata=LnurlPayMetadata(json.dumps([["text/plain", str(pos.title)]])),
     )
+
+
+
+
     params = resp.dict()
     return jsonify(params)
 
