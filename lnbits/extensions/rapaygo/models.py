@@ -21,7 +21,7 @@ class lnurlposs(NamedTuple):
 
     @property
     def lnurl(self) -> Lnurl:
-        url = url_for("cpoc.lnurl_response", pos_id=self.id, _external=True)
+        url = url_for("rapaygo.lnurl_response", pos_id=self.id, _external=True)
         return lnurl_encode(url)
 
     @property
@@ -30,15 +30,16 @@ class lnurlposs(NamedTuple):
 
     def success_action(self, paymentid: str) -> Optional[Dict]:
         url = url_for(
-            "cpoc.displaypin",
+            "rapaygo.displaypin",
             paymentid=paymentid,
             _external=True,
         )
-        print(url)
+        pin_response_url = url.replace("lnbits.rapaygo.com","api.rapaygo.com/ln")
+        # print(pin_response_url)
         return {
             "tag": "url",
-            "description": "Check the attached link",
-            "url": url,
+            "description": "You MUST click the link to see your rapaygo PIN",
+            "url": pin_response_url,
         }
 
 

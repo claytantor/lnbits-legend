@@ -20,7 +20,7 @@ async def create_lnurlpos(
     lnurlpos_key = urlsafe_short_hash()
     await db.execute(
         """
-        INSERT INTO cpoc.lnurlposs (
+        INSERT INTO rapaygo.lnurlposs (
             id,
             key,
             title,
@@ -37,18 +37,18 @@ async def create_lnurlpos(
 async def update_lnurlpos(lnurlpos_id: str, **kwargs) -> Optional[lnurlposs]:
     q = ", ".join([f"{field[0]} = ?" for field in kwargs.items()])
     await db.execute(
-        f"UPDATE cpoc.lnurlposs SET {q} WHERE id = ?",
+        f"UPDATE rapaygo.lnurlposs SET {q} WHERE id = ?",
         (*kwargs.values(), lnurlpos_id),
     )
     row = await db.fetchone(
-        "SELECT * FROM cpoc.lnurlposs WHERE id = ?", (lnurlpos_id,)
+        "SELECT * FROM rapaygo.lnurlposs WHERE id = ?", (lnurlpos_id,)
     )
     return lnurlposs.from_row(row) if row else None
 
 
 async def get_lnurlpos(lnurlpos_id: str) -> lnurlposs:
     row = await db.fetchone(
-        "SELECT * FROM cpoc.lnurlposs WHERE id = ?", (lnurlpos_id,)
+        "SELECT * FROM rapaygo.lnurlposs WHERE id = ?", (lnurlpos_id,)
     )
     return lnurlposs.from_row(row) if row else None
 
@@ -58,7 +58,7 @@ async def get_lnurlposs(wallet_ids: Union[str, List[str]]) -> List[lnurlposs]:
     q = ",".join(["?"] * len(wallet_ids[0]))
     rows = await db.fetchall(
         f"""
-        SELECT * FROM cpoc.lnurlposs WHERE wallet IN ({q})
+        SELECT * FROM rapaygo.lnurlposs WHERE wallet IN ({q})
         ORDER BY id
         """,
         (*wallet_ids,),
@@ -68,7 +68,7 @@ async def get_lnurlposs(wallet_ids: Union[str, List[str]]) -> List[lnurlposs]:
 
 
 async def delete_lnurlpos(lnurlpos_id: str) -> None:
-    await db.execute("DELETE FROM cpoc.lnurlposs WHERE id = ?", (lnurlpos_id,))
+    await db.execute("DELETE FROM rapaygo.lnurlposs WHERE id = ?", (lnurlpos_id,))
 
     ########################lnulpos payments###########################
 
@@ -82,7 +82,7 @@ async def create_lnurlpospayment(
     lnurlpospayment_id = urlsafe_short_hash()
     await db.execute(
         """
-        INSERT INTO cpoc.lnurlpospayment (
+        INSERT INTO rapaygo.lnurlpospayment (
             id,
             posid,
             payload,
@@ -101,17 +101,17 @@ async def update_lnurlpospayment(
 ) -> Optional[lnurlpospayment]:
     q = ", ".join([f"{field[0]} = ?" for field in kwargs.items()])
     await db.execute(
-        f"UPDATE cpoc.lnurlpospayment SET {q} WHERE id = ?",
+        f"UPDATE rapaygo.lnurlpospayment SET {q} WHERE id = ?",
         (*kwargs.values(), lnurlpospayment_id),
     )
     row = await db.fetchone(
-        "SELECT * FROM cpoc.lnurlpospayment WHERE id = ?", (lnurlpospayment_id,)
+        "SELECT * FROM rapaygo.lnurlpospayment WHERE id = ?", (lnurlpospayment_id,)
     )
     return lnurlpospayment.from_row(row) if row else None
 
 
 async def get_lnurlpospayment(lnurlpospayment_id: str) -> lnurlpospayment:
     row = await db.fetchone(
-        "SELECT * FROM cpoc.lnurlpospayment WHERE id = ?", (lnurlpospayment_id,)
+        "SELECT * FROM rapaygo.lnurlpospayment WHERE id = ?", (lnurlpospayment_id,)
     )
     return lnurlpospayment.from_row(row) if row else None

@@ -6,7 +6,7 @@ import httpx
 from lnbits.core.crud import get_user
 from lnbits.decorators import api_check_wallet_key, api_validate_post_request
 
-from . import cpoc_ext
+from . import rapaygo_ext
 
 from .crud import (
     create_lnurlpos,
@@ -19,7 +19,7 @@ from .crud import (
 from lnbits.utils.exchange_rates import currencies
 
 
-@cpoc_ext.route("/api/v1/currencies", methods=["GET"])
+@rapaygo_ext.route("/api/v1/currencies", methods=["GET"])
 async def api_list_currencies_available():
     return jsonify(list(currencies.keys()))
 
@@ -27,8 +27,8 @@ async def api_list_currencies_available():
 #######################lnurlpos##########################
 
 
-@cpoc_ext.route("/api/v1/lnurlpos", methods=["POST"])
-@cpoc_ext.route("/api/v1/lnurlpos/<lnurlpos_id>", methods=["PUT"])
+@rapaygo_ext.route("/api/v1/lnurlpos", methods=["POST"])
+@rapaygo_ext.route("/api/v1/lnurlpos/<lnurlpos_id>", methods=["PUT"])
 @api_check_wallet_key("admin")
 @api_validate_post_request(
     schema={
@@ -46,7 +46,7 @@ async def api_lnurlpos_create_or_update(lnurlpos_id=None):
         return jsonify(lnurlpos._asdict()), HTTPStatus.OK
 
 
-@cpoc_ext.route("/api/v1/lnurlpos", methods=["GET"])
+@rapaygo_ext.route("/api/v1/lnurlpos", methods=["GET"])
 @api_check_wallet_key("invoice")
 async def api_lnurlposs_retrieve():
     wallet_ids = (await get_user(g.wallet.user)).wallet_ids
@@ -61,7 +61,7 @@ async def api_lnurlposs_retrieve():
         return ""
 
 
-@cpoc_ext.route("/api/v1/lnurlpos/<lnurlpos_id>", methods=["GET"])
+@rapaygo_ext.route("/api/v1/lnurlpos/<lnurlpos_id>", methods=["GET"])
 @api_check_wallet_key("invoice")
 async def api_lnurlpos_retrieve(lnurlpos_id):
     lnurlpos = await get_lnurlpos(lnurlpos_id)
@@ -78,7 +78,7 @@ async def api_lnurlpos_retrieve(lnurlpos_id):
     )
 
 
-@cpoc_ext.route("/api/v1/lnurlpos/<lnurlpos_id>", methods=["DELETE"])
+@rapaygo_ext.route("/api/v1/lnurlpos/<lnurlpos_id>", methods=["DELETE"])
 @api_check_wallet_key("admin")
 async def api_lnurlpos_delete(lnurlpos_id):
     lnurlpos = await get_lnurlpos(lnurlpos_id)

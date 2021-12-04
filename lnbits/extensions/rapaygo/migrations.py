@@ -1,11 +1,11 @@
 async def m001_initial(db):
     """
-    Initial cpoc table.
+    Initial rapaygo table.
     """
 
     await db.execute(
         f"""
-        CREATE TABLE cpoc.lnurlposs (
+        CREATE TABLE rapaygo.lnurlposs (
             id TEXT NOT NULL PRIMARY KEY,
             key TEXT NOT NULL,
             title TEXT NOT NULL,
@@ -17,7 +17,7 @@ async def m001_initial(db):
     )
     await db.execute(
         f"""
-        CREATE TABLE cpoc.lnurlpospayment (
+        CREATE TABLE rapaygo.lnurlpospayment (
             id TEXT NOT NULL PRIMARY KEY,
             posid TEXT NOT NULL,
             payhash TEXT,

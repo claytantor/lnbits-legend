@@ -117,7 +117,7 @@
       </q-card-section>
       <q-card-section class="q-pa-none">
         <q-separator></q-separator>
-        <q-list> {% include "cpoc/_api_docs.html" %} </q-list>
+        <q-list> {% include "rapaygo/_api_docs.html" %} </q-list>
       </q-card-section>
     </q-card>
   </div>
@@ -328,7 +328,7 @@
           }
         }
         LNbits.api
-          .request('POST', '/cpoc/api/v1/lnurlpos', wallet, updatedData)
+          .request('POST', '/rapaygo/api/v1/lnurlpos', wallet, updatedData)
           .then(function (response) {
             self.lnurlposLinks.push(maplnurlpos(response.data))
             self.formDialoglnurlpos.show = false
@@ -343,7 +343,7 @@
         LNbits.api
           .request(
             'GET',
-            '/cpoc/api/v1/lnurlpos',
+            '/rapaygo/api/v1/lnurlpos',
             self.g.user.wallets[0].adminkey
           )
           .then(function (response) {
@@ -361,7 +361,7 @@
         LNbits.api
           .request(
             'GET',
-            '/cpoc/api/v1/lnurlpos/' + lnurlpos_id,
+            '/rapaygo/api/v1/lnurlpos/' + lnurlpos_id,
             self.g.user.wallets[0].adminkey
           )
           .then(function (response) {
@@ -381,7 +381,7 @@
             LNbits.api
               .request(
                 'DELETE',
-                '/cpoc/api/v1/lnurlpos/' + lnurlposId,
+                '/rapaygo/api/v1/lnurlpos/' + lnurlposId,
                 self.g.user.wallets[0].adminkey
               )
               .then(function (response) {
@@ -420,7 +420,7 @@
         LNbits.api
           .request(
             'PUT',
-            '/cpoc/api/v1/lnurlpos/' + updatedData.id,
+            '/rapaygo/api/v1/lnurlpos/' + updatedData.id,
             wallet,
             updatedData
           )

@@ -66,6 +66,50 @@ async def extensions():
     return await render_template("core/extensions.html", user=await get_user(g.user.id))
 
 
+@core_app.route("/create_wallet", methods=['POST'])
+# @validate_uuids(["usr", "wal"])
+async def create_wallet():
+    # user_id = request.args.get("usr", type=str)
+    # wallet_id = request.args.get("wal", type=str)
+    # wallet_name = request.args.get("nme", type=str)
+    # service_fee = int(SERVICE_FEE) if int(SERVICE_FEE) == SERVICE_FEE else SERVICE_FEE
+
+    # # just wallet_name: create a new user, then create a new wallet for user with wallet_name
+    # # just user_id: return the first user wallet or create one if none found (with default wallet_name)
+    # # user_id and wallet_name: create a new wallet for user with wallet_name
+    # # user_id and wallet_id: return that wallet if user is the owner
+    # # nothing: create everything
+
+    # if not user_id:
+    #     user = await get_user((await create_account()).id)
+    # else:
+    #     user = await get_user(user_id)
+    #     if not user:
+    #         abort(HTTPStatus.NOT_FOUND, "User does not exist.")
+    #         return
+
+    #     if LNBITS_ALLOWED_USERS and user_id not in LNBITS_ALLOWED_USERS:
+    #         abort(HTTPStatus.UNAUTHORIZED, "User not authorized.")
+
+    # if not wallet_id:
+    #     if user.wallets and not wallet_name:
+    #         wallet = user.wallets[0]
+    #     else:
+    #         wallet = await create_wallet(user_id=user.id, wallet_name=wallet_name)
+
+    #     return redirect(url_for("core.wallet", usr=user.id, wal=wallet.id))
+
+    # wallet = user.get_wallet(wallet_id)
+    # if not wallet:
+    #     abort(HTTPStatus.FORBIDDEN, "Not your wallet.")
+
+    # return await render_template(
+    #     "core/wallet.html", user=user, wallet=wallet, service_fee=service_fee
+    # )
+    return jsonify({"response":"created"})
+
+
+
 @core_app.route("/wallet")
 @validate_uuids(["usr", "wal"])
 async def wallet():

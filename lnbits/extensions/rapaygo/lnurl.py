@@ -7,7 +7,7 @@ from lnurl.types import LnurlPayMetadata
 from lnbits.core.services import create_invoice
 from hashlib import md5
 
-from . import cpoc_ext
+from . import rapaygo_ext
 
 from .crud import (
     get_lnurlpos,
@@ -18,7 +18,7 @@ from .crud import (
 from lnbits.utils.exchange_rates import fiat_amount_as_satoshis
 
 
-@cpoc_ext.route("/api/v1/lnurl/<nonce>/<payload>/<pos_id>", methods=["GET"])
+@rapaygo_ext.route("/api/v1/lnurl/<nonce>/<payload>/<pos_id>", methods=["GET"])
 async def lnurl_response(nonce, pos_id, payload):
     pos = await get_lnurlpos(pos_id)
     if not pos:
@@ -46,12 +46,16 @@ async def lnurl_response(nonce, pos_id, payload):
     )
     if not lnurlpospayment:
         return jsonify({"status": "ERROR", "reason": "Could not create payment"})
+
+    # this allows us to use api gateway as a proxy
+    cb_url = url_for(
+             "rapaygo.lnurl_callback",
+             paymentid=lnurlpospayment.id,
+             _external=True,
+        ).replace("lnbits.rapaygo.com","api.rapaygo.com/ln")
+
     resp = LnurlPayResponse(
-        callback=url_for(
-            "cpoc.lnurl_callback",
-            paymentid=lnurlpospayment.id,
-            _external=True,
-        ),
+        callback=cb_url,
         min_sendable=price_msat,
         max_sendable=price_msat,
         metadata=LnurlPayMetadata(json.dumps([["text/plain", str(pos.title)]])),
@@ -60,7 +64,7 @@ async def lnurl_response(nonce, pos_id, payload):
     return jsonify(params)
 
 
-@cpoc_ext.route("/api/v1/lnurl/cb/<paymentid>", methods=["GET"])
+@rapaygo_ext.route("/api/v1/lnurl/cb/<paymentid>", methods=["GET"])
 async def lnurl_callback(paymentid):
     lnurlpospayment = await get_lnurlpospayment(paymentid)
     pos = await get_lnurlpos(lnurlpospayment.posid)

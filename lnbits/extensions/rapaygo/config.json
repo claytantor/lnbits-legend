@@ -1,6 +1,6 @@
 {
-    "name": "CPOC",
+    "name": "rapaygo",
     "short_description": "This is a new extension for POS",
-    "icon": "info",
+    "icon": "point_of_sale",
     "contributors": ["claytantor"]
 }

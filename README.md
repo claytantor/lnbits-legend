@@ -44,3 +44,11 @@ LNbits is inspired by all the great work of [opennode.com](https://www.opennode.
 [codecov]: https://codecov.io/gh/lnbits/lnbits
 [codecov-badge]: https://codecov.io/gh/lnbits/lnbits/branch/master/graph/badge.svg
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+
+
+## Running a Proxy
+
+```
+hypercorn -k trio --bind 0.0.0.0:5010 'lnbits.app:create_app()'
+docker run -d -p 5000:80 -e TARGET_SERVER=172.31.10.185:5010 mikesplain/nginx-proxy-pass
+```

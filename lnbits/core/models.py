@@ -45,7 +45,7 @@ class Wallet(NamedTuple):
         return self.balance_msat - fee_reserve(self.balance_msat)
 
     @property
-    def lnurlwithdraw_full(self) -> str:
+    def lnurlwithdraw_full(self) -> str: 
         url = url_for(
             "core.lnurl_full_withdraw",
             usr=self.user,
@@ -53,8 +53,12 @@ class Wallet(NamedTuple):
             _external=True,
         )
         try:
+            print(url)
+            # foo = "http://0.0.0.0:5000/withdraw?usr=4707a59e3d564dd4b4f7ca4bd74a721e&wal=e87a5f2ff04242678995cd8a29f731c2"
+            url = "https://foo.com/withdraw?usr=4707a59e3d564dd4b4f7ca4bd74a721e&wal=e87a5f2ff04242678995cd8a29f731c2"
             return lnurl_encode(url)
-        except:
+        except Exception as e:
+            print("error making url",e)
             return ""
 
     def lnurlauth_key(self, domain: str) -> SigningKey:
@@ -150,6 +154,7 @@ class Payment(NamedTuple):
             print(f" - deleting outgoing failed payment {self.checking_id}: {status}")
             await self.delete()
         elif not status.pending:
+            print("check_pending models")
             print(
                 f" - marking '{'in' if self.is_in else 'out'}' {self.checking_id} as not pending anymore: {status}"
             )
