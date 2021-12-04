@@ -26,7 +26,7 @@
       <q-card>
         <q-card-section>
           <code
-            ><span class="text-blue">POST</span> /lnurlpos/api/v1/lnurlpos</code
+            ><span class="text-blue">POST</span> /rapaygo/api/v1/lnurlpos</code
           >
           <h5 class="text-caption q-mt-sm q-mb-none">Headers</h5>
           <code>{"X-Api-Key": &lt;admin_key&gt;}</code><br />
@@ -41,7 +41,7 @@
           <code
             >curl -X POST {{ request.url_root }}api/v1/lnurlpos -d '{"title":
             &lt;string&gt;, "message":&lt;string&gt;, "currency":
-            &lt;integer&gt;}' -H "Content-type: application/json" -H "X-Api-Key:
+            &lt;string&gt; "wallet": "{{g.user.wallets[0].id }}" }' -H "Content-type: application/json" -H "X-Api-Key:
             {{g.user.wallets[0].adminkey }}"
           </code>
         </q-card-section>
