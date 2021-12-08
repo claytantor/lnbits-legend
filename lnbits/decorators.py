@@ -4,7 +4,7 @@ from functools import wraps
 from http import HTTPStatus
 from typing import List, Union
 from uuid import UUID
-
+import json
 from lnbits.core.crud import get_user, get_wallet_for_key
 from lnbits.settings import LNBITS_ALLOWED_USERS
 
@@ -44,6 +44,7 @@ def api_validate_post_request(*, schema: dict):
 
             v = Validator(schema)
             data = await request.get_json()
+            # print("=VALIDATE=",json.dumps(data))
             g.data = {key: data[key] for key in schema.keys() if key in data}
 
             if not v.validate(g.data):
