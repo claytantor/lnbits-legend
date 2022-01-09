@@ -5,6 +5,7 @@ import httpx
 
 from lnbits.core.crud import get_user
 from lnbits.decorators import api_check_wallet_key, api_validate_post_request
+from lnbits.utils.exchange_rates import get_fiat_rate_satoshis
 
 from . import rapaygo_ext
 
@@ -22,6 +23,15 @@ from lnbits.utils.exchange_rates import currencies
 @rapaygo_ext.route("/api/v1/currencies", methods=["GET"])
 async def api_list_currencies_available():
     return jsonify(list(currencies.keys()))
+
+@rapaygo_ext.route("/api/v1/rate/<currency>", methods=["GET"])
+async def api_check_fiat_rate(currency):
+    try:
+        rate = await get_fiat_rate_satoshis(currency)
+    except AssertionError:
+        rate = None
+
+    return jsonify({"rate": rate}), HTTPStatus.OK
 
 
 #######################lnurlpos##########################
