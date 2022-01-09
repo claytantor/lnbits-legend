@@ -42,6 +42,7 @@ async def on_invoice_paid(payment: Payment) -> None:
                         "comment": payment.extra.get("comment"),
                         "extra": payment.extra.get("extra"),
                         "lnurlp": pay_link.id,
+                        "description": pay_link.description
                     },
                     timeout=40,
                 )
