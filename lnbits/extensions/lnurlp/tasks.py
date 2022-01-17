@@ -28,8 +28,10 @@ async def on_invoice_paid(payment: Payment) -> None:
     if payment.extra.get("wh_status"):
         # this webhook has already been sent
         return
-
+       
     pay_link = await get_pay_link(payment.extra.get("link", -1))
+    print(f"lnurlp on_invoice_paid payment: {payment} pay_link:{pay_link}")
+
     if pay_link and pay_link.webhook_url:
         async with httpx.AsyncClient() as client:
             try:

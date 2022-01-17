@@ -63,6 +63,7 @@ async def create_pay_link(
 
 async def get_pay_link(link_id: int) -> Optional[PayLink]:
     row = await db.fetchone("SELECT * FROM lnurlp.pay_links WHERE id = ?", (link_id,))
+    print("get_pay_link row", row)
     return PayLink.from_row(row) if row else None
 
 
