@@ -50,9 +50,16 @@ async def on_invoice_paid(payment: Payment) -> None:
                 )
                 await mark_webhook_sent(payment, r.status_code)
                 print(f"lnurlp on_invoice_paid webhook sent: {r.status_code}")
-            except (httpx.ConnectError, httpx.RequestError):
+
+
+            except httpx.ConnectError as err:
+                print("httpx.ConnectError error: {0}".format(err))
                 await mark_webhook_sent(payment, -1)
-                print(f"lnurlp on_invoice_paid webhook NOT sent: {r.status_code}")
+                print(f"lnurlp on_invoice_paid webhook NOT sent to {pay_link.webhook_url}.")
+            except httpx.RequestError as err:
+                print("httpx.RequestError error: {0}".format(err))
+                await mark_webhook_sent(payment, -1)
+                print(f"lnurlp on_invoice_paid webhook NOT sent to {pay_link.webhook_url}.")
 
 
 async def mark_webhook_sent(payment: Payment, status: int) -> None:
