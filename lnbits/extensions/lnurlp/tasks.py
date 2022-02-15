@@ -21,6 +21,7 @@ async def wait_for_paid_invoices(invoice_paid_chan: trio.MemoryReceiveChannel):
 
 
 async def on_invoice_paid(payment: Payment) -> None:
+    print('======== on_invoice_paid')
     if "lnurlp" != payment.extra.get("tag"):
         # not an lnurlp invoice
         return
