@@ -10,6 +10,7 @@ from typing import Dict, Union
 
 from lnbits import bolt11, lnurl
 from lnbits.bolt11 import Invoice
+from lnbits.core.crud import get_payment_by_hash
 from lnbits.decorators import api_check_wallet_key, api_validate_post_request
 from lnbits.utils.exchange_rates import currencies, fiat_amount_as_satoshis
 
@@ -314,8 +315,29 @@ async def api_payments_pay_lnurl():
     )
 
 
+@core_app.route("/api/v1/payments_p/<payment_hash>", methods=["GET"])
+async def api_payment(payment_hash):
+    # payment = await g.wallet.get_payment(payment_hash)
+    payment = await get_payment_by_hash(payment_hash)
+
+    if not payment:
+        return jsonify({"message": "Payment does not exist."}), HTTPStatus.NOT_FOUND
+    elif not payment.pending:
+        return jsonify({"paid": True, "preimage": payment.preimage}), HTTPStatus.OK
+
+    try:
+        await payment.check_pending()
+    except Exception:
+        return jsonify({"paid": False}), HTTPStatus.OK
+
+    return (
+        jsonify({"paid": not payment.pending, "preimage": payment.preimage}),
+        HTTPStatus.OK,
+    )
+
+
 @core_app.route("/api/v1/payments/<payment_hash>", methods=["GET"])
-@api_check_wallet_key("invoice")
+@api_check_wallet_key("invoice") 
 async def api_payment(payment_hash):
     payment = await g.wallet.get_payment(payment_hash)
 
