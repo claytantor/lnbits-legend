@@ -105,12 +105,14 @@ async def api_lnurl_callback(link_id):
 
     success_action = link.success_action(payment_hash)
     if success_action:
+        print('success',payment_request)
         resp = LnurlPayActionResponse(
             pr=payment_request,
             success_action=success_action,
             routes=[],
         )
     else:
+        print('NOT success',payment_request)
         resp = LnurlPayActionResponse(
             pr=payment_request,
             routes=[],
