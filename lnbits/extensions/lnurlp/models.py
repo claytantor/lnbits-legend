@@ -5,7 +5,7 @@ from typing import NamedTuple, Optional, Dict
 from sqlite3 import Row
 from lnbits.lnurl import encode as lnurl_encode  # type: ignore
 from lnurl.types import LnurlPayMetadata  # type: ignore
-
+from .phrase import PhraseGenerator
 
 class PayLink(NamedTuple):
     id: int
@@ -36,6 +36,11 @@ class PayLink(NamedTuple):
         return LnurlPayMetadata(json.dumps([["text/plain", self.description]]))
 
     def success_action(self, payment_hash: str) -> Optional[Dict]:
+
+        generate_grammar = PhraseGenerator()
+        # print(generate_grammar.generate(5))
+        self.success_text = generate_grammar.generate(2)
+
         if self.success_url:
             url: ParseResult = urlparse(self.success_url)
             qs: Dict = parse_qs(url.query)
