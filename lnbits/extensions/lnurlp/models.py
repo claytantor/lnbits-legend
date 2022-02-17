@@ -39,7 +39,7 @@ class PayLink(NamedTuple):
 
         generate_grammar = PhraseGenerator()
         # print(generate_grammar.generate(5))
-        self.success_text = generate_grammar.generate(2)
+        g_success_text = generate_grammar.generate(2)
 
         if self.success_url:
             url: ParseResult = urlparse(self.success_url)
@@ -48,13 +48,13 @@ class PayLink(NamedTuple):
             url = url._replace(query=urlencode(qs, doseq=True))
             return {
                 "tag": "url",
-                "description": self.success_text or "~",
+                "description": g_success_text or "~",
                 "url": urlunparse(url),
             }
         elif self.success_text:
             return {
                 "tag": "message",
-                "message": self.success_text,
+                "message": g_success_text,
             }
         else:
             return None
