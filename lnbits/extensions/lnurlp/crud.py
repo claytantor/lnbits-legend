@@ -22,8 +22,8 @@ async def create_pay_link(
     method = db.execute if db.type == SQLITE else db.fetchone
 
     #override success text with a random phrase
-    generate_grammar = PhraseGenerator()
-    g_success_text = generate_grammar.generate(2)
+    # generate_grammar = PhraseGenerator()
+    # g_success_text = generate_grammar.generate(2)
 
     result = await (method)(
         f"""
@@ -49,7 +49,7 @@ async def create_pay_link(
             min,
             max,
             webhook_url,
-            g_success_text,
+            success_text,
             success_url,
             comment_chars,
             currency,
