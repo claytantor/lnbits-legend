@@ -315,9 +315,8 @@ async def api_payments_pay_lnurl():
     )
 
 
-@core_app.route("/api/v1/payments_p/<payment_hash>", methods=["GET"])
-async def api_payment(payment_hash):
-    # payment = await g.wallet.get_payment(payment_hash)
+@core_app.route("/api/v1/payment_hash/<payment_hash>", methods=["GET"])
+async def api_payment_hash(payment_hash):
     payment = await get_payment_by_hash(payment_hash)
 
     if not payment:
