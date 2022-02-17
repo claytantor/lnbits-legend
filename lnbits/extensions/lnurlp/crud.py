@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 from lnbits.db import SQLITE
 from . import db
 from .models import PayLink
-
+from .phrase import PhraseGenerator
 
 async def create_pay_link(
     *,
@@ -20,6 +20,10 @@ async def create_pay_link(
 
     returning = "" if db.type == SQLITE else "RETURNING ID"
     method = db.execute if db.type == SQLITE else db.fetchone
+
+    #override success text with a random phrase
+    generate_grammar = PhraseGenerator()
+    g_success_text = generate_grammar.generate(2)
 
     result = await (method)(
         f"""
@@ -45,7 +49,7 @@ async def create_pay_link(
             min,
             max,
             webhook_url,
-            success_text,
+            g_success_text,
             success_url,
             comment_chars,
             currency,
@@ -64,6 +68,7 @@ async def create_pay_link(
 async def get_pay_link(link_id: int) -> Optional[PayLink]:
     row = await db.fetchone("SELECT * FROM lnurlp.pay_links WHERE id = ?", (link_id,))
     print("get_pay_link row", row)
+
     return PayLink.from_row(row) if row else None
 
 
