@@ -50,7 +50,7 @@ async def on_invoice_paid(payment: Payment) -> None:
                         "extra": payment.extra.get("extra"),
                         "lnurlp": pay_link.id,
                         "description": pay_link.description,
-                        "action_phrase":g_success_text
+                        "action_phrase":""
                     },
                     timeout=40,
                 )
