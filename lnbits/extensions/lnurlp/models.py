@@ -36,10 +36,11 @@ class PayLink(NamedTuple):
         return LnurlPayMetadata(json.dumps([["text/plain", self.description]]))
 
     def success_action(self, payment_hash: str) -> Optional[Dict]:
+
         if self.success_url:
             url: ParseResult = urlparse(self.success_url)
             qs: Dict = parse_qs(url.query)
-            qs["payment_hash"] = payment_hash
+            qs["payment_hash"] = payment_hash     
             url = url._replace(query=urlencode(qs, doseq=True))
             return {
                 "tag": "url",

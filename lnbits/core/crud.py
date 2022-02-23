@@ -417,6 +417,20 @@ async def check_internal(
         return row["checking_id"]
 
 
+async def get_payment_by_hash(
+    payment_hash: str, conn: Optional[Connection] = None
+) -> Optional[Payment]:
+    row = await (conn or db).fetchone(
+        """
+        SELECT *
+        FROM apipayments
+        WHERE  hash = ?
+        """,
+        (payment_hash),
+    )
+
+    return Payment.from_row(row) if row else None
+
 # balance_check
 # -------------
 

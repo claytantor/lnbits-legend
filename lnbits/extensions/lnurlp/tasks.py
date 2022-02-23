@@ -7,6 +7,7 @@ from lnbits.core.models import Payment
 from lnbits.tasks import register_invoice_listener
 
 from .crud import get_pay_link
+from .phrase import PhraseGenerator
 
 
 async def register_listeners():
@@ -21,6 +22,7 @@ async def wait_for_paid_invoices(invoice_paid_chan: trio.MemoryReceiveChannel):
 
 
 async def on_invoice_paid(payment: Payment) -> None:
+    print('======== on_invoice_paid')
     if "lnurlp" != payment.extra.get("tag"):
         # not an lnurlp invoice
         return
@@ -35,6 +37,9 @@ async def on_invoice_paid(payment: Payment) -> None:
     if pay_link and pay_link.webhook_url:
         async with httpx.AsyncClient() as client:
             try:
+                #override success text with a random phrase
+                generate_grammar = PhraseGenerator()
+                g_success_text = generate_grammar.generate(2)
                 r = await client.post(
                     pay_link.webhook_url,
                     json={
@@ -44,7 +49,8 @@ async def on_invoice_paid(payment: Payment) -> None:
                         "comment": payment.extra.get("comment"),
                         "extra": payment.extra.get("extra"),
                         "lnurlp": pay_link.id,
-                        "description": pay_link.description
+                        "description": pay_link.description,
+                        "action_phrase": g_success_text
                     },
                     timeout=40,
                 )
