@@ -11,23 +11,23 @@ from .crud import get_targets
 
 
 async def register_listeners():
-    print("register_listeners")
+    # print("register_listeners")
     invoice_paid_chan_send, invoice_paid_chan_recv = trio.open_memory_channel(2)
-    print(f"invoice_paid_chan_send: {invoice_paid_chan_send.__dict__}")
-    print(f"invoice_paid_chan_recv: {invoice_paid_chan_recv.__dict__}")
+    # print(f"invoice_paid_chan_send: {invoice_paid_chan_send.__dict__}")
+    # print(f"invoice_paid_chan_recv: {invoice_paid_chan_recv.__dict__}")
     register_invoice_listener(invoice_paid_chan_send)
     await wait_for_paid_invoices(invoice_paid_chan_recv)
 
 
 async def wait_for_paid_invoices(invoice_paid_chan: trio.MemoryReceiveChannel):
-    print(f"wait_for_paid_invoices: {invoice_paid_chan.__dict__}")
+    # print(f"wait_for_paid_invoices: {invoice_paid_chan.__dict__}")
     async for payment in invoice_paid_chan:
         #print(f"payment item for wait subscribe: {payment.__dict__}")
         await on_invoice_paid(payment)
 
 
 async def on_invoice_paid(payment: Payment) -> None:
-    print(f"on_invoice_paid: {payment}")
+    # print(f"on_invoice_paid: {payment}")
     if "splitpayments" == payment.extra.get("tag") or payment.extra.get("splitted"):
         # already splitted, ignore
         return
@@ -40,8 +40,8 @@ async def on_invoice_paid(payment: Payment) -> None:
     ]
     transfers = [(wallet, amount) for wallet, amount in transfers if amount > 0]
     amount_left = payment.amount - sum([amount for _, amount in transfers])
-    print(f"transfers: {transfers}")
-    print(f"amount_left: {amount_left}")
+    # print(f"transfers: {transfers}")
+    # print(f"amount_left: {amount_left}")
     
 
     if amount_left < 0:

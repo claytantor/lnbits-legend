@@ -29,7 +29,7 @@ async def api_public_payment_longpolling(payment_hash):
 
     send_payment, receive_payment = trio.open_memory_channel(0)
 
-    print("adding standalone invoice listener", payment_hash, send_payment)
+    # print("adding standalone invoice listener", payment_hash, send_payment)
     api_invoice_listeners.append(send_payment)
 
     response = None

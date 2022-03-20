@@ -273,7 +273,7 @@ async def api_diagonalleys_stall_products(indexer_id):
         rows = db.fetchone(
             "SELECT * FROM diagonalley.indexers WHERE id = ?", (indexer_id,)
         )
-        print(rows[1])
+        # print(rows[1])
         if not rows:
             return jsonify({"message": "Indexer does not exist."}), HTTPStatus.NOT_FOUND
 

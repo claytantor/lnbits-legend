@@ -21,7 +21,7 @@ async def api_lnurl_response(link_id):
         )
 
     rate = await get_fiat_rate_satoshis(link.currency) if link.currency else 1
-    print("link info", link)
+    # print("link info", link)
 
     min_send = math.ceil(link.min * rate) * 1000
     max_send = round(link.max * rate) * 1000
@@ -105,14 +105,14 @@ async def api_lnurl_callback(link_id):
 
     success_action = link.success_action(payment_hash)
     if success_action:
-        print('success',payment_request)
+        # print('success',payment_request)
         resp = LnurlPayActionResponse(
             pr=payment_request,
             success_action=success_action,
             routes=[],
         )
     else:
-        print('NOT success',payment_request)
+        # print('NOT success',payment_request)
         resp = LnurlPayActionResponse(
             pr=payment_request,
             routes=[],

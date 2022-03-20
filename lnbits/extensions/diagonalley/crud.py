@@ -154,8 +154,6 @@ def get_diagonalleys_indexer(indexer_id: str) -> Optional[Indexers]:
     try:
         x = httpx.get(roww["indexeraddress"] + "/" + roww["ratingkey"])
         if x.status_code == 200:
-            print(x)
-            print("poo")
             with open_ext_db("diagonalley") as db:
                 db.execute(
                     "UPDATE diagonalley.indexers SET online = ? WHERE id = ?",
