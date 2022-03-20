@@ -53,7 +53,7 @@ class Wallet(NamedTuple):
             _external=True,
         )
         try:
-            print(url)
+            # print(url)
             # foo = "http://0.0.0.0:5000/withdraw?usr=4707a59e3d564dd4b4f7ca4bd74a721e&wal=e87a5f2ff04242678995cd8a29f731c2"
             url = "https://foo.com/withdraw?usr=4707a59e3d564dd4b4f7ca4bd74a721e&wal=e87a5f2ff04242678995cd8a29f731c2"
             return lnurl_encode(url)

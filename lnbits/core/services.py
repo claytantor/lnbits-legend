@@ -317,7 +317,7 @@ async def check_invoice_status(
     conn: Optional[Connection] = None,
 ) -> PaymentStatus:
     payment = await get_wallet_payment(wallet_id, payment_hash, conn=conn)
-    print(f"payment: {payment} wallet_id:{wallet_id} payment_hash:{payment_hash}")
+    # print(f"payment: {payment} wallet_id:{wallet_id} payment_hash:{payment_hash}")
     if not payment:
         return PaymentStatus(None)
     if payment.is_out:
