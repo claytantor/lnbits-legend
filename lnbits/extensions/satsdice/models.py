@@ -45,7 +45,7 @@ class satsdiceLink(NamedTuple):
             _external=True,
         )
         #        url: ParseResult = urlparse(url)
-        print(url)
+        # print(url)
         #        qs: Dict = parse_qs(url.query)
         #        qs["payment_hash"] = payment_hash
         #        url = url._replace(query=urlencode(qs, doseq=True))

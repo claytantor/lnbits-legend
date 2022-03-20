@@ -453,7 +453,7 @@ async def api_payments_decode():
 @core_app.route("/api/v1/lnurlscan/<code>", methods=["GET"])
 @api_check_wallet_key("invoice")
 async def api_lnurlscan(code: str):
-    print("lnurlscan", code)
+    # print("lnurlscan", code)
     try:
         url = lnurl.decode(code)
         domain = urlparse(url).netloc
@@ -576,7 +576,7 @@ async def api_lnurlscan(code: str):
     }
 )
 async def api_perform_lnurlauth():
-    print("lnurlauth", g.data["callback"])
+    # print("lnurlauth", g.data["callback"])
     err = await perform_lnurlauth(g.data["callback"])
     if err:
         return jsonify({"reason": err.reason}), HTTPStatus.SERVICE_UNAVAILABLE

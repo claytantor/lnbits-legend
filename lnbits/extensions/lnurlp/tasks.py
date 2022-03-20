@@ -22,7 +22,7 @@ async def wait_for_paid_invoices(invoice_paid_chan: trio.MemoryReceiveChannel):
 
 
 async def on_invoice_paid(payment: Payment) -> None:
-    print('======== on_invoice_paid')
+    # print('======== on_invoice_paid')
     if "lnurlp" != payment.extra.get("tag"):
         # not an lnurlp invoice
         return
@@ -32,7 +32,7 @@ async def on_invoice_paid(payment: Payment) -> None:
         return
        
     pay_link = await get_pay_link(payment.extra.get("link", -1))
-    print(f"lnurlp on_invoice_paid payment: {payment} pay_link:{pay_link}")
+    # print(f"lnurlp on_invoice_paid payment: {payment} pay_link:{pay_link}")
 
     if pay_link and pay_link.webhook_url:
         async with httpx.AsyncClient() as client:
@@ -55,7 +55,7 @@ async def on_invoice_paid(payment: Payment) -> None:
                     timeout=40,
                 )
                 await mark_webhook_sent(payment, r.status_code)
-                print(f"lnurlp on_invoice_paid webhook sent: {r.status_code}")
+                # print(f"lnurlp on_invoice_paid webhook sent: {r.status_code}")
 
 
             except httpx.ConnectError as err:
