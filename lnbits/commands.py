@@ -13,11 +13,12 @@ from .helpers import (
     get_js_vendored,
     url_for_vendored,
 )
-from .settings import LNBITS_PATH
+from .settings import LNBITS_PATH,LNBITS_DATA_FOLDER, LNBITS_DATABASE_URL
 
 
 @click.command("migrate")
 def db_migrate():
+    print("Migrating databases...",LNBITS_PATH,LNBITS_DATA_FOLDER, LNBITS_DATABASE_URL)
     trio.run(migrate_databases)
 
 

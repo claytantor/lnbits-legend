@@ -240,6 +240,7 @@ async def btc_price(currency: str) -> float:
         try:
             url = provider.api_url.format(**replacements)
             async with httpx.AsyncClient() as client:
+                print("currency url", url)
                 r = await client.get(url, timeout=0.5)
                 r.raise_for_status()
                 data = r.json()

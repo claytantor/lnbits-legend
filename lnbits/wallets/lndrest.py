@@ -35,6 +35,7 @@ class LndRestWallet(Wallet):
         )
         self.auth = {"Grpc-Metadata-macaroon": macaroon}
         self.cert = getenv("LND_REST_CERT")
+        print("lnd wallet cert", self.cert)
 
     async def status(self) -> StatusResponse:
         try:

@@ -105,6 +105,11 @@ class LndWallet(Wallet):
         )
         network = getenv("LND_GRPC_NETWORK", "mainnet")
 
+        from os import listdir
+        from os.path import isfile, join
+        onlyfiles = [f for f in listdir("/env") if isfile(join("/env", f))]
+        print(onlyfiles)
+
         self.rpc = lndgrpc.LNDClient(
             f"{self.endpoint}:{self.port}",
             cert_filepath=self.cert_path,

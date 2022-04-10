@@ -46,3 +46,4 @@ COPY --chown=1000:1000 lnbits /app/lnbits
 EXPOSE 5000
 
 CMD quart assets && quart migrate && hypercorn -k trio --bind $LNBITS_BIND 'lnbits.app:create_app()'
+

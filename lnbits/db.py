@@ -85,6 +85,7 @@ class Database(Compat):
 
         if LNBITS_DATABASE_URL:
             database_uri = LNBITS_DATABASE_URL
+            print("loading database from url", LNBITS_DATABASE_URL)
 
             if database_uri.startswith("cockroachdb://"):
                 self.type = COCKROACH

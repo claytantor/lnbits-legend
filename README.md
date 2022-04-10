@@ -52,3 +52,20 @@ LNbits is inspired by all the great work of [opennode.com](https://www.opennode.
 hypercorn -k trio --bind 0.0.0.0:5010 'lnbits.app:create_app()'
 docker run -d -p 5000:80 -e TARGET_SERVER=172.31.10.185:5010 mikesplain/nginx-proxy-pass
 ```
+
+## Running the Docker Container
+
+```
+# build the container
+docker build -t claytantor/lnbits-legend:20220409 .
+
+# dump the database
+docker run --user $(id -u):$(id -g) -v $(pwd)/data:/db keinos/sqlite3   sh -c "sqlite3 /db/database.sqlite3 .dump > /db/dump.sql"
+
+# run the container
+docker run --user $(id -u):$(id -g) -p 5000:5000 -v $(pwd)/data:/app/lnbits/data --env-file env/docker_local.env claytantor/lnbits-legend:latest
+
+docker run --user $(id -u):$(id -g) -p 5000:5000 -v $(pwd)/data:/app/lnbits/data -v $(pwd)/env/ln/voltage-rapaygo-v1:/env  --env-file env/core_voltage.env claytantor/lnbits-legend:latest
+
+
+```
