@@ -33,3 +33,7 @@ __bundle__
 
 node_modules
 lnbits/static/bundle.*
+env/
+.python-version
+env/*
+
