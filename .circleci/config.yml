@@ -14,4 +14,3 @@ workflows:
           push-image: true
           executor: aws-ecr/default
           public-registry: false
-          repo: claytantor/lnbits-legend
