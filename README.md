@@ -84,3 +84,4 @@ If you like this project and might even use or extend it, why not [send some tip
 
 # extra notes
 docker build --no-cache -t claytantor/lnbits-legend:latest . 
+
