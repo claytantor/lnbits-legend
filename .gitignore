@@ -34,6 +34,10 @@ __bundle__
 node_modules
 lnbits/static/bundle.*
 env/
-.python-version
 env/*
+.python-version
+logs/
+logs/*
 
+lnbits/extensions/rapaygo/
+lnbits/extensions/rapaygo/*

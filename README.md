@@ -79,3 +79,8 @@ If you like this project and might even use or extend it, why not [send some tip
 [codecov]: https://codecov.io/gh/lnbits/lnbits
 [codecov-badge]: https://codecov.io/gh/lnbits/lnbits/branch/master/graph/badge.svg
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+
+
+
+# extra notes
+docker build --no-cache -t claytantor/lnbits-legend:latest . 

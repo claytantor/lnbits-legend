@@ -1,0 +1,6 @@
+{
+    "name": "rapaygo",
+    "short_description": "This is a new extension for POS",
+    "icon": "point_of_sale",
+    "contributors": ["claytantor"]
+}

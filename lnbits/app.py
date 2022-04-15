@@ -1,8 +1,14 @@
+import os
 import asyncio
 import importlib
 import sys
 import traceback
 import warnings
+
+
+import logging
+from fastapi.logger import logger as fastapi_logger
+from logging.handlers import RotatingFileHandler
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -35,11 +41,25 @@ from .tasks import (
 )
 
 
+logging_level = os.getenv("LOGGING_LEVEL", "INFO")
+logging_file = os.getenv("LOGGING_FILE", "lnbits.log")
+
+
 def create_app(config_object="lnbits.settings") -> FastAPI:
     """Create application factory.
     :param config_object: The configuration object to use.
     """
     app = FastAPI()
+
+    # logger
+    formatter = logging.Formatter(
+        "[%(asctime)s.%(msecs)03d] %(levelname)s [%(thread)d] - %(message)s", "%Y-%m-%d %H:%M:%S")
+    handler = RotatingFileHandler(logging_file, backupCount=0)
+    logging.getLogger("fastapi").setLevel(logging_level)
+    fastapi_logger.addHandler(handler)
+    handler.setFormatter(formatter)
+    fastapi_logger.info('== create_app_fastapi ==')
+
     app.mount("/static", StaticFiles(directory="lnbits/static"), name="static")
     app.mount(
         "/core/static", StaticFiles(directory="lnbits/core/static"), name="core_static"
@@ -92,9 +112,9 @@ def check_funding_source(app: FastAPI) -> None:
                 f"  × The backend for {WALLET.__class__.__name__} isn't working properly: '{error_message}'",
                 RuntimeWarning,
             )
-            print("Retrying connection to backend in 5 seconds...")
+            fastapi_logger.info("Retrying connection to backend in 5 seconds...")
             await asyncio.sleep(5)
-        print(
+        fastapi_logger.info(
             f"  ✔️ {WALLET.__class__.__name__} seems to be connected and with a balance of {balance} msat."
         )
 
