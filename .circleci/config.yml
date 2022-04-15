@@ -4,19 +4,9 @@ orbs:
   aws-cli: circleci/aws-cli@0.1.18
   aws-ecr: circleci/aws-ecr@8.0.0
 
-jobs:
-  build_basic:
-    docker:
-      - image: cimg/python:3.10.4
-    steps:
-      - checkout
-      - run: python --version
-
-
 workflows:
   build_and_push_image:
     jobs:
-      - build_basic
       - aws-ecr/build_and_push_image:
           account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
