@@ -8,10 +8,10 @@ workflows:
   build_and_push_image:
     jobs:
       - aws-ecr/build-and-push-image:
-          repo: "${AWS_RESOURCE_NAME_PREFIX}"
+          repo: ${AWS_RESOURCE_NAME_PREFIX}
           region: ${AWS_DEFAULT_REGION}
-          tag: "${CIRCLE_SHA1}"
+          tag: ${CIRCLE_SHA1}
           push-image: true
           executor: aws-ecr/default
           public-registry: false
-          registry-id: "${AWS_ACCOUNT_ID}"
+          registry-id: ${AWS_ACCOUNT_ID}
