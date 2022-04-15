@@ -2,28 +2,23 @@
 version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@0.1.18
-  aws-ecr: circleci/aws-ecr@0.0.2
+  aws-ecr: circleci/aws-ecr@8.0.0
 
 jobs:
-  build:
+  build_basic:
     docker:
       - image: cimg/python:3.10.4
     steps:
       - checkout
       - run: python --version
-      - aws-ecr/build-and-push-image:
+
+
+workflows:
+  build_and_push_image:
+    jobs:
+      - build_basic
+      - aws-ecr/build_and_push_image:
           account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           region: ${AWS_DEFAULT_REGION}
           tag: "${CIRCLE_SHA1}"
-
-workflows:
-  version: 2
-  build_all:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: 
-              - dev-uvicorn
-              # - main
