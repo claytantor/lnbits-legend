@@ -20,5 +20,5 @@ workflows:
           filters:
             branches:
               only: 
-              - dev-uvi
+              - dev-uvicorn
               # - main
