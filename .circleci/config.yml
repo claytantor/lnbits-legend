@@ -13,3 +13,5 @@ workflows:
           tag: "${CIRCLE_SHA1}"
           push-image: true
           executor: aws-ecr/default
+          public-registry: false
+          repo: claytantor/lnbits-legend
