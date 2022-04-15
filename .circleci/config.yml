@@ -14,4 +14,4 @@ workflows:
           push-image: true
           executor: aws-ecr/default
           public-registry: false
-          registry-id: ${AWS_ACCOUNT_ID}
+          registry-id: 705212546939
