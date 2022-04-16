@@ -1,123 +1,113 @@
-from quart import g, jsonify, request
 from http import HTTPStatus
+
+from fastapi import Request
+from fastapi.param_functions import Query
+from fastapi.params import Depends
 from lnurl.exceptions import InvalidUrl as LnurlInvalidUrl  # type: ignore
+from starlette.exceptions import HTTPException
 
 from lnbits.core.crud import get_user
-from lnbits.decorators import api_check_wallet_key, api_validate_post_request
+from lnbits.decorators import WalletTypeInfo, get_key_type
 
 from . import satsdice_ext
 from .crud import (
     create_satsdice_pay,
+    delete_satsdice_pay,
     get_satsdice_pay,
     get_satsdice_pays,
     update_satsdice_pay,
-    delete_satsdice_pay,
-    create_satsdice_withdraw,
-    get_satsdice_withdraw,
-    get_satsdice_withdraws,
-    update_satsdice_withdraw,
-    delete_satsdice_withdraw,
-    create_withdraw_hash_check,
 )
+from .models import CreateSatsDiceLink, CreateSatsDiceWithdraws, satsdiceLink
 
 ################LNURL pay
 
 
-@satsdice_ext.route("/api/v1/links", methods=["GET"])
-@api_check_wallet_key("invoice")
-async def api_links():
-    wallet_ids = [g.wallet.id]
+@satsdice_ext.get("/api/v1/links")
+async def api_links(
+    request: Request,
+    wallet: WalletTypeInfo = Depends(get_key_type),
+    all_wallets: bool = Query(False),
+):
+    wallet_ids = [wallet.wallet.id]
 
-    if "all_wallets" in request.args:
-        wallet_ids = (await get_user(g.wallet.user)).wallet_ids
+    if all_wallets:
+        wallet_ids = (await get_user(wallet.wallet.user)).wallet_ids
 
     try:
-        return (
-            jsonify(
-                [
-                    {**link._asdict(), **{"lnurl": link.lnurl}}
-                    for link in await get_satsdice_pays(wallet_ids)
-                ]
-            ),
-            HTTPStatus.OK,
-        )
+        links = await get_satsdice_pays(wallet_ids)
+
+        return [{**link.dict(), **{"lnurl": link.lnurl(request)}} for link in links]
     except LnurlInvalidUrl:
-        return (
-            jsonify(
-                {
-                    "message": "LNURLs need to be delivered over a publically accessible `https` domain or Tor."
-                }
-            ),
-            HTTPStatus.UPGRADE_REQUIRED,
+        raise HTTPException(
+            status_code=HTTPStatus.UPGRADE_REQUIRED,
+            detail="LNURLs need to be delivered over a publically accessible `https` domain or Tor.",
         )
 
 
-@satsdice_ext.route("/api/v1/links/<link_id>", methods=["GET"])
-@api_check_wallet_key("invoice")
-async def api_link_retrieve(link_id):
+@satsdice_ext.get("/api/v1/links/{link_id}")
+async def api_link_retrieve(
+    link_id: str = Query(None), wallet: WalletTypeInfo = Depends(get_key_type)
+):
     link = await get_satsdice_pay(link_id)
 
     if not link:
-        return jsonify({"message": "Pay link does not exist."}), HTTPStatus.NOT_FOUND
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Pay link does not exist."
+        )
 
-    if link.wallet != g.wallet.id:
-        return jsonify({"message": "Not your pay link."}), HTTPStatus.FORBIDDEN
+    if link.wallet != wallet.wallet.id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Not your pay link."
+        )
 
-    return jsonify({**link._asdict(), **{"lnurl": link.lnurl}}), HTTPStatus.OK
+    return {**link.dict(), **{"lnurl": link.lnurl}}
 
 
-@satsdice_ext.route("/api/v1/links", methods=["POST"])
-@satsdice_ext.route("/api/v1/links/<link_id>", methods=["PUT"])
-@api_check_wallet_key("invoice")
-@api_validate_post_request(
-    schema={
-        "title": {"type": "string", "empty": False, "required": True},
-        "base_url": {"type": "string", "empty": False, "required": True},
-        "min_bet": {"type": "number", "required": True},
-        "max_bet": {"type": "number", "required": True},
-        "multiplier": {"type": "number", "required": True},
-        "chance": {"type": "float", "required": True},
-        "haircut": {"type": "number", "required": True},
-    }
-)
-async def api_link_create_or_update(link_id=None):
-    if g.data["min_bet"] > g.data["max_bet"]:
-        return jsonify({"message": "Min is greater than max."}), HTTPStatus.BAD_REQUEST
+@satsdice_ext.post("/api/v1/links", status_code=HTTPStatus.CREATED)
+@satsdice_ext.put("/api/v1/links/{link_id}", status_code=HTTPStatus.OK)
+async def api_link_create_or_update(
+    data: CreateSatsDiceLink,
+    wallet: WalletTypeInfo = Depends(get_key_type),
+    link_id: str = Query(None),
+):
+    if data.min_bet > data.max_bet:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Bad request")
     if link_id:
         link = await get_satsdice_pay(link_id)
-
         if not link:
-            return (
-                jsonify({"message": "Satsdice does not exist."}),
-                HTTPStatus.NOT_FOUND,
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND, detail="Satsdice does not exist"
             )
 
-        if link.wallet != g.wallet.id:
-            return (
-                jsonify({"message": "Come on, seriously, this isn't your satsdice!"}),
-                HTTPStatus.FORBIDDEN,
+        if link.wallet != wallet.wallet.id:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN,
+                detail="Come on, seriously, this isn't your satsdice!",
             )
 
-        link = await update_satsdice_pay(link_id, **g.data)
+        data.wallet = wallet.wallet.id
+        link = await update_satsdice_pay(link_id, **data.dict())
     else:
-        link = await create_satsdice_pay(wallet_id=g.wallet.id, **g.data)
+        link = await create_satsdice_pay(wallet_id=wallet.wallet.id, data=data)
 
-    return (
-        jsonify({**link._asdict(), **{"lnurl": link.lnurl}}),
-        HTTPStatus.OK if link_id else HTTPStatus.CREATED,
-    )
+    return {**link.dict(), **{"lnurl": link.lnurl}}
 
 
-@satsdice_ext.route("/api/v1/links/<link_id>", methods=["DELETE"])
-@api_check_wallet_key("invoice")
-async def api_link_delete(link_id):
+@satsdice_ext.delete("/api/v1/links/{link_id}")
+async def api_link_delete(
+    wallet: WalletTypeInfo = Depends(get_key_type), link_id: str = Query(None)
+):
     link = await get_satsdice_pay(link_id)
 
     if not link:
-        return jsonify({"message": "Pay link does not exist."}), HTTPStatus.NOT_FOUND
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Pay link does not exist."
+        )
 
-    if link.wallet != g.wallet.id:
-        return jsonify({"message": "Not your pay link."}), HTTPStatus.FORBIDDEN
+    if link.wallet != wallet.wallet.id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Not your pay link."
+        )
 
     await delete_satsdice_pay(link_id)
 
@@ -127,139 +117,11 @@ async def api_link_delete(link_id):
 ##########LNURL withdraw
 
 
-@satsdice_ext.route("/api/v1/withdraws", methods=["GET"])
-@api_check_wallet_key("invoice")
-async def api_withdraws():
-    wallet_ids = [g.wallet.id]
-
-    if "all_wallets" in request.args:
-        wallet_ids = (await get_user(g.wallet.user)).wallet_ids
-    try:
-        return (
-            jsonify(
-                [
-                    {
-                        **withdraw._asdict(),
-                        **{"lnurl": withdraw.lnurl},
-                    }
-                    for withdraw in await get_satsdice_withdraws(wallet_ids)
-                ]
-            ),
-            HTTPStatus.OK,
-        )
-    except LnurlInvalidUrl:
-        return (
-            jsonify(
-                {
-                    "message": "LNURLs need to be delivered over a publically accessible `https` domain or Tor."
-                }
-            ),
-            HTTPStatus.UPGRADE_REQUIRED,
-        )
-
-
-@satsdice_ext.route("/api/v1/withdraws/<withdraw_id>", methods=["GET"])
-@api_check_wallet_key("invoice")
-async def api_withdraw_retrieve(withdraw_id):
-    withdraw = await get_satsdice_withdraw(withdraw_id, 0)
-
-    if not withdraw:
-        return (
-            jsonify({"message": "satsdice withdraw does not exist."}),
-            HTTPStatus.NOT_FOUND,
-        )
-
-    if withdraw.wallet != g.wallet.id:
-        return (
-            jsonify({"message": "Not your satsdice withdraw."}),
-            HTTPStatus.FORBIDDEN,
-        )
-
-    return jsonify({**withdraw._asdict(), **{"lnurl": withdraw.lnurl}}), HTTPStatus.OK
-
-
-@satsdice_ext.route("/api/v1/withdraws", methods=["POST"])
-@satsdice_ext.route("/api/v1/withdraws/<withdraw_id>", methods=["PUT"])
-@api_check_wallet_key("admin")
-@api_validate_post_request(
-    schema={
-        "title": {"type": "string", "empty": False, "required": True},
-        "min_satsdiceable": {"type": "integer", "min": 1, "required": True},
-        "max_satsdiceable": {"type": "integer", "min": 1, "required": True},
-        "uses": {"type": "integer", "min": 1, "required": True},
-        "wait_time": {"type": "integer", "min": 1, "required": True},
-        "is_unique": {"type": "boolean", "required": True},
-    }
-)
-async def api_withdraw_create_or_update(withdraw_id=None):
-    if g.data["max_satsdiceable"] < g.data["min_satsdiceable"]:
-        return (
-            jsonify(
-                {
-                    "message": "`max_satsdiceable` needs to be at least `min_satsdiceable`."
-                }
-            ),
-            HTTPStatus.BAD_REQUEST,
-        )
-
-    usescsv = ""
-    for i in range(g.data["uses"]):
-        if g.data["is_unique"]:
-            usescsv += "," + str(i + 1)
-        else:
-            usescsv += "," + str(1)
-    usescsv = usescsv[1:]
-
-    if withdraw_id:
-        withdraw = await get_satsdice_withdraw(withdraw_id, 0)
-        if not withdraw:
-            return (
-                jsonify({"message": "satsdice withdraw does not exist."}),
-                HTTPStatus.NOT_FOUND,
-            )
-        if withdraw.wallet != g.wallet.id:
-            return (
-                jsonify({"message": "Not your satsdice withdraw."}),
-                HTTPStatus.FORBIDDEN,
-            )
-        withdraw = await update_satsdice_withdraw(
-            withdraw_id, **g.data, usescsv=usescsv, used=0
-        )
-    else:
-        withdraw = await create_satsdice_withdraw(
-            wallet_id=g.wallet.id, **g.data, usescsv=usescsv
-        )
-
-    return (
-        jsonify({**withdraw._asdict(), **{"lnurl": withdraw.lnurl}}),
-        HTTPStatus.OK if withdraw_id else HTTPStatus.CREATED,
-    )
-
-
-@satsdice_ext.route("/api/v1/withdraws/<withdraw_id>", methods=["DELETE"])
-@api_check_wallet_key("admin")
-async def api_withdraw_delete(withdraw_id):
-    withdraw = await get_satsdice_withdraw(withdraw_id)
-
-    if not withdraw:
-        return (
-            jsonify({"message": "satsdice withdraw does not exist."}),
-            HTTPStatus.NOT_FOUND,
-        )
-
-    if withdraw.wallet != g.wallet.id:
-        return (
-            jsonify({"message": "Not your satsdice withdraw."}),
-            HTTPStatus.FORBIDDEN,
-        )
-
-    await delete_satsdice_withdraw(withdraw_id)
-
-    return "", HTTPStatus.NO_CONTENT
-
-
-@satsdice_ext.route("/api/v1/withdraws/<the_hash>/<lnurl_id>", methods=["GET"])
-@api_check_wallet_key("invoice")
-async def api_withdraw_hash_retrieve(the_hash, lnurl_id):
+@satsdice_ext.get("/api/v1/withdraws/{the_hash}/{lnurl_id}")
+async def api_withdraw_hash_retrieve(
+    wallet: WalletTypeInfo = Depends(get_key_type),
+    lnurl_id: str = Query(None),
+    the_hash: str = Query(None),
+):
     hashCheck = await get_withdraw_hash_check(the_hash, lnurl_id)
-    return jsonify(hashCheck), HTTPStatus.OK
+    return hashCheck

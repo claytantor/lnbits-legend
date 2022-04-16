@@ -15,6 +15,7 @@ __pycache__
 .webassets-cache
 htmlcov
 test-reports
+tests/data
 
 *.swo
 *.swp
@@ -32,4 +33,11 @@ __bundle__
 
 node_modules
 lnbits/static/bundle.*
+env/
+env/*
 .python-version
+logs/
+logs/*
+
+lnbits/extensions/rapaygo/
+lnbits/extensions/rapaygo/*

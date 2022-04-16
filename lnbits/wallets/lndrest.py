@@ -1,9 +1,13 @@
-import trio
+import asyncio
+from pydoc import describe
 import httpx
 import json
 import base64
 from os import getenv
 from typing import Optional, Dict, AsyncGenerator
+
+from lnbits import bolt11 as lnbits_bolt11
+from .macaroon import load_macaroon, AESCipher
 
 from .base import (
     StatusResponse,
@@ -33,15 +37,22 @@ class LndRestWallet(Wallet):
             or getenv("LND_INVOICE_MACAROON")
             or getenv("LND_REST_INVOICE_MACAROON")
         )
-        self.auth = {"Grpc-Metadata-macaroon": macaroon}
-        self.cert = getenv("LND_REST_CERT")
+
+        encrypted_macaroon = getenv("LND_REST_MACAROON_ENCRYPTED")
+        if encrypted_macaroon:
+            macaroon = AESCipher(description="macaroon decryption").decrypt(
+                encrypted_macaroon
+            )
+        self.macaroon = load_macaroon(macaroon)
+
+        self.auth = {"Grpc-Metadata-macaroon": self.macaroon}
+        self.cert = getenv("LND_REST_CERT", True)
 
     async def status(self) -> StatusResponse:
         try:
             async with httpx.AsyncClient(verify=self.cert) as client:
                 r = await client.get(
-                    f"{self.endpoint}/v1/balance/channels",
-                    headers=self.auth,
+                    f"{self.endpoint}/v1/balance/channels", headers=self.auth
                 )
         except (httpx.ConnectError, httpx.RequestError):
             return StatusResponse(f"Unable to connect to {self.endpoint}.", 0)
@@ -61,10 +72,7 @@ class LndRestWallet(Wallet):
         memo: Optional[str] = None,
         description_hash: Optional[bytes] = None,
     ) -> InvoiceResponse:
-        data: Dict = {
-            "value": amount,
-            "private": True,
-        }
+        data: Dict = {"value": amount, "private": True}
         if description_hash:
             data["description_hash"] = base64.b64encode(description_hash).decode(
                 "ascii"
@@ -74,9 +82,7 @@ class LndRestWallet(Wallet):
 
         async with httpx.AsyncClient(verify=self.cert) as client:
             r = await client.post(
-                url=f"{self.endpoint}/v1/invoices",
-                headers=self.auth,
-                json=data,
+                url=f"{self.endpoint}/v1/invoices", headers=self.auth, json=data
             )
 
         if r.is_error:
@@ -94,12 +100,16 @@ class LndRestWallet(Wallet):
 
         return InvoiceResponse(True, checking_id, payment_request, None)
 
-    async def pay_invoice(self, bolt11: str) -> PaymentResponse:
+    async def pay_invoice(self, bolt11: str, fee_limit_msat: int) -> PaymentResponse:
         async with httpx.AsyncClient(verify=self.cert) as client:
+            # set the fee limit for the payment
+            lnrpcFeeLimit = dict()
+            lnrpcFeeLimit["fixed_msat"] = "{}".format(fee_limit_msat)
+
             r = await client.post(
                 url=f"{self.endpoint}/v1/channels/transactions",
                 headers=self.auth,
-                json={"payment_request": bolt11},
+                json={"payment_request": bolt11, "fee_limit": lnrpcFeeLimit},
                 timeout=180,
             )
 
@@ -119,8 +129,7 @@ class LndRestWallet(Wallet):
 
         async with httpx.AsyncClient(verify=self.cert) as client:
             r = await client.get(
-                url=f"{self.endpoint}/v1/invoice/{checking_id}",
-                headers=self.auth,
+                url=f"{self.endpoint}/v1/invoice/{checking_id}", headers=self.auth
             )
 
         if r.is_error or not r.json().get("settled"):
@@ -152,6 +161,7 @@ class LndRestWallet(Wallet):
 
         # for some reason our checking_ids are in base64 but the payment hashes
         # returned here are in hex, lnd is weird
+        checking_id = checking_id.replace("_", "/")
         checking_id = base64.b64decode(checking_id).hex()
 
         for p in r.json()["payments"]:
@@ -166,9 +176,7 @@ class LndRestWallet(Wallet):
         while True:
             try:
                 async with httpx.AsyncClient(
-                    timeout=None,
-                    headers=self.auth,
-                    verify=self.cert,
+                    timeout=None, headers=self.auth, verify=self.cert
                 ) as client:
                     async with client.stream("GET", url) as r:
                         async for line in r.aiter_lines():
@@ -186,4 +194,4 @@ class LndRestWallet(Wallet):
                 pass
 
             print("lost connection to lnd invoices stream, retrying in 5 seconds")
-            await trio.sleep(5)
+            await asyncio.sleep(5)

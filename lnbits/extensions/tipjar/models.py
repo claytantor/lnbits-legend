@@ -1,8 +1,32 @@
 from sqlite3 import Row
-from typing import NamedTuple, Optional
+from typing import Optional
+
+from fastapi.param_functions import Query
+from pydantic import BaseModel
+from pydantic.main import BaseModel
 
 
-class Tip(NamedTuple):
+class CreateCharge(BaseModel):
+    onchainwallet: str = Query(None)
+    lnbitswallet: str = Query(None)
+    description: str = Query(...)
+    webhook: str = Query(None)
+    completelink: str = Query(None)
+    completelinktext: str = Query(None)
+    time: int = Query(..., ge=1)
+    amount: int = Query(..., ge=1)
+
+
+class createTip(BaseModel):
+    id: str
+    wallet: str
+    sats: int
+    tipjar: int
+    name: str = "Anonymous"
+    message: str = ""
+
+
+class Tip(BaseModel):
     """A Tip represents a single donation"""
 
     id: str  # This ID always corresponds to a satspay charge ID
@@ -17,7 +41,21 @@ class Tip(NamedTuple):
         return cls(**dict(row))
 
 
-class TipJar(NamedTuple):
+class createTipJar(BaseModel):
+    name: str
+    wallet: str
+    webhook: str = None
+    onchain: str = None
+
+
+class createTips(BaseModel):
+    name: str
+    sats: str
+    tipjar: str
+    message: str
+
+
+class TipJar(BaseModel):
     """A TipJar represents a user's tip jar"""
 
     id: int

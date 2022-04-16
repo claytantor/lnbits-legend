@@ -1,14 +1,17 @@
-from quart import Blueprint
+from fastapi import APIRouter
+
 from lnbits.db import Database
+from lnbits.helpers import template_renderer
 
 db = Database("ext_satsdice")
 
-
-satsdice_ext: Blueprint = Blueprint(
-    "satsdice", __name__, static_folder="static", template_folder="templates"
-)
+satsdice_ext: APIRouter = APIRouter(prefix="/satsdice", tags=["satsdice"])
 
 
-from .views_api import *  # noqa
-from .views import *  # noqa
+def satsdice_renderer():
+    return template_renderer(["lnbits/extensions/satsdice/templates"])
+
+
 from .lnurl import *  # noqa
+from .views import *  # noqa
+from .views_api import *  # noqa

@@ -1,8 +1,31 @@
 from sqlite3 import Row
-from typing import NamedTuple, Optional
+from typing import Optional
+
+from fastapi.params import Query
+from pydantic.main import BaseModel
 
 
-class Donation(NamedTuple):
+class CreateService(BaseModel):
+    twitchuser: str = Query(...)
+    client_id: str = Query(...)
+    client_secret: str = Query(...)
+    wallet: str = Query(...)
+    servicename: str = Query(...)
+    onchain: str = Query(None)
+
+
+class CreateDonation(BaseModel):
+    name: str = Query("Anonymous")
+    sats: int = Query(..., ge=1)
+    service: int = Query(...)
+    message: str = Query("")
+
+
+class ValidateDonation(BaseModel):
+    id: str = Query(...)
+
+
+class Donation(BaseModel):
     """A Donation simply contains all the necessary information about a
     user's donation to a streamer
     """
@@ -22,7 +45,7 @@ class Donation(NamedTuple):
         return cls(**dict(row))
 
 
-class Service(NamedTuple):
+class Service(BaseModel):
     """A Service represents an integration with a third-party API
 
     Currently, Streamlabs is the only supported Service.
@@ -34,10 +57,10 @@ class Service(NamedTuple):
     client_id: str  # Third party service Client ID
     client_secret: str  # Secret corresponding to the Client ID
     wallet: str
-    onchain: str
+    onchain: Optional[str]
     servicename: str  # Currently, this will just always be "Streamlabs"
     authenticated: bool  # Whether a token (see below) has been acquired yet
-    token: Optional[int]  # The token with which to authenticate requests
+    token: Optional[str]  # The token with which to authenticate requests
 
     @classmethod
     def from_row(cls, row: Row) -> "Service":

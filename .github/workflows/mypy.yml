@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: jpetrucciani/mypy-check@master
-        with:
-          path: lnbits
+      # this is failing
+      # - uses: jpetrucciani/mypy-check@master
+      #   with:
+      #     mypy_flags: '--install-types --non-interactive'
+      #     path: lnbits

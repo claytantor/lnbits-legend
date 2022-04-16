@@ -1,9 +1,6 @@
 LNbits Legend (BETA)
 ======
 
-[![github-tests-badge]][github-tests]
-[![github-mypy-badge]][github-mypy]
-[![codecov-badge]][codecov]
 [![license-badge]](LICENSE)
 [![docs-badge]][docs]
 
@@ -14,7 +11,17 @@ LNbits Legend (BETA)
 
 For the Go version of LNbits checkout <a href="https://github.com/lnbits/lnbits-infinity/">Infinity</a>. Demo servers available on [lnbits.com](https://lnbits.com).
 
-Join us on [https://t.me/lnbits](https://t.me/lnbits).
+(LNbits is beta, for responsible disclosure of any concerns please contact lnbits@pm.me)
+
+Use [lnbits.com](https://lnbits.com), or run your own LNbits server!
+
+LNbits is a very simple Python server that sits on top of any funding source, and can be used as:
+
+* Accounts system to mitigate the risk of exposing applications to your full balance, via unique API keys for each wallet
+* Extendable platform for exploring lightning-network functionality via LNbits extension framework
+* Part of a development stack via LNbits API
+* Fallback wallet for the LNURL scheme
+* Instant wallet for LN demonstrations
 
 LNbits can run on top of any lightning-network funding source, currently there is support for LND, c-lightning, Spark, LNpay, OpenNode, lntxbot, with more being added regularly.
 
@@ -24,9 +31,7 @@ Checkout the LNbits [YouTube](https://www.youtube.com/playlist?list=PLPj3KCksGbS
 
 ### Running LNbits
 
-See the [install guide](docs/guide/installation.md) for details on installation and setup.
-
-There's a [slightly different setup](docs/devs/installation.md) if you want to contribute to LNbits, but if your changes don't require adding or removing any package dependencies you don't have to bother with that, just follow the [normal installation](docs/guide/installation.md) steps.
+See the [install guide](docs/devs/installation.md) for details on installation and setup.
 
 ### Tip us
 
@@ -46,9 +51,7 @@ LNbits is inspired by all the great work of [opennode.com](https://www.opennode.
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 
 
-## Running a Proxy
 
-```
-hypercorn -k trio --bind 0.0.0.0:5010 'lnbits.app:create_app()'
-docker run -d -p 5000:80 -e TARGET_SERVER=172.31.10.185:5010 mikesplain/nginx-proxy-pass
-```
+# extra notes
+docker build --no-cache -t claytantor/lnbits-legend:latest . 
+

@@ -92,9 +92,9 @@
       <q-card-section class="q-pa-none">
         <q-separator></q-separator>
         <q-list>
-          {% include "lnurlp/_api_docs.html" %}
+          {% include "satsdice/_api_docs.html" %}
           <q-separator></q-separator>
-          {% include "lnurlp/_lnurl.html" %}
+          {% include "satsdice/_lnurl.html" %}
         </q-list>
       </q-card-section>
     </q-card>
@@ -186,7 +186,7 @@
             color="primary"
             :disable="
                 formDialog.data.wallet == null ||
-                formDialog.data.title == null || formDialog.data.min < 1 || formDialog.data.max < formDialog.data.min"
+                formDialog.data.title == null || formDialog.data.min < 10 || formDialog.data.max < formDialog.data.min"
             type="submit"
             >Create satsdice</q-btn
           >
@@ -262,8 +262,6 @@
 </div>
 
 {% endblock %} {% block scripts %} {{ window_vars(user) }}
-<script src="{{ url_for('static', filename='vendor/vue-qrcode@1.0.2/vue-qrcode.min.js') }}"></script>
-<style></style>
 <script>
   /* globals Quasar, Vue, _, VueQrcode, windowMixin, LNbits, LOCALE */
   Vue.component(VueQrcode.name, VueQrcode)
@@ -309,7 +307,7 @@
           fixedAmount: true,
           data: {
             haircut: 0,
-            min_bet: 1,
+            min_bet: 10,
             max_bet: 1000,
             currency: 'satoshis',
             comment_chars: 0
@@ -330,7 +328,8 @@
       chanceValueCalc() {
         this.chanceValue = (
           (1 / this.multiValue) * 100 -
-          this.formDialog.data.haircut
+          this.formDialog.data.haircut -
+          (1 / this.multiValue) * 10
         ).toFixed(2)
         return this.chanceValue
       }
@@ -343,10 +342,11 @@
         LNbits.api
           .request(
             'GET',
-            '/satsdice/api/v1/links?all_wallets',
+            '/satsdice/api/v1/links?all_wallets=true',
             this.g.user.wallets[0].inkey
           )
           .then(response => {
+            console.log(response.data)
             this.payLinks = response.data.map(mapPayLink)
           })
           .catch(err => {
@@ -359,6 +359,7 @@
       },
       openQrCodeDialog(linkId) {
         var link = _.findWhere(this.payLinks, {id: linkId})
+        console.log(link)
         if (link.currency) this.updateFiatRate(link.currency)
 
         this.qrCodeDialog.data = {
@@ -470,6 +471,7 @@
             this.payLinks.push(mapPayLink(response.data))
             this.formDialog.show = false
             this.resetFormData()
+            this.getPayLinks()
           })
           .catch(err => {
             LNbits.utils.notifyApiError(err)
@@ -512,13 +514,12 @@
       }
     },
     created() {
-      console.log('this.multiValue')
       if (this.g.user.wallets.length) {
         var getPayLinks = this.getPayLinks
         getPayLinks()
-        this.checker = setInterval(() => {
-          getPayLinks()
-        }, 20000)
+        // this.checker = setInterval(() => {
+        //   getPayLinks()
+        // }, 20000)
       }
     }
   })
