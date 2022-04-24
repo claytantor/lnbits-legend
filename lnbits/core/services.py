@@ -85,6 +85,7 @@ async def pay_invoice(
     description: str = "",
     conn: Optional[Connection] = None,
 ) -> str:
+    print(f"pay_invoice: {payment_request}")
     invoice = bolt11.decode(payment_request)
     fee_reserve_msat = fee_reserve(invoice.amount_msat)
     async with (db.reuse_conn(conn) if conn else db.connect()) as conn:

@@ -8,6 +8,7 @@ from urllib.parse import ParseResult, parse_qs, urlencode, urlparse, urlunparse
 
 import httpx
 from fastapi import Query, Request, Header
+from fastapi.logger import logger as fastapi_logger
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from fastapi.params import Body
@@ -329,7 +330,8 @@ async def subscribe(request: Request, wallet: Wallet):
 
     payment_queue = asyncio.Queue(0)
 
-    print("adding sse listener", payment_queue)
+    # print("adding sse listener", payment_queue)
+    fastapi_logger.info("adding sse listener", payment_queue)
     api_invoice_listeners.append(payment_queue)
 
     send_queue = asyncio.Queue(0)
