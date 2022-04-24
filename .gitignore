@@ -42,5 +42,5 @@ logs/*
 lnbits/extensions/rapaygo/
 lnbits/extensions/rapaygo/*
 *.pem
-etl/
-etl/*
+etl/extract/
+etl/extract/*
