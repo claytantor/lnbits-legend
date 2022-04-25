@@ -1,0 +1,9 @@
+scheme:
+  tables:
+    - name: accounts
+    - name: apipayments
+      columns:
+      - checking_id
+      - amount
+      - wallet    
+    - name: balance_check

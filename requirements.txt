@@ -49,3 +49,4 @@ watchgod==0.7
 websockets==10.0
 zipp==3.5.0
 pandas
+PyYAML
